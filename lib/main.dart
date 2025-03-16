@@ -8,8 +8,9 @@ import 'package:window_manager/window_manager.dart';
 import 'pages/home_navigator.dart';
 import 'pages/login.dart';
 import 'services/periodic.dart';
+import 'services/restic.dart' as restic_service;
 import 'services/restic.dart';
-import 'services/store.dart';
+import 'services/store.dart' as store;
 import 'services/logger.dart' as log;
 import 'views/backup_view/util.dart';
 
@@ -40,8 +41,8 @@ Future<void> main() async {
   );
 
   log.init();
-  await ObjectBox.init();
-  ResticService.init(5);
+  await store.init();
+  restic_service.init(5);
   BackupService.init();
   BackupRetentionCheckService.init();
 
@@ -114,12 +115,12 @@ class _AppState extends State<App> with TrayListener {
 
   void _exit() {
     // 退出时取消所有restic任务
-    ResticService.taskManager.runningTasks().forEach(
+    resticService.runningTasks().forEach(
       (element) {
         element.cancel();
       },
     );
-    ResticService.taskManager.queuedTasks().forEach(
+    resticService.queuedTasks().forEach(
       (element) {
         element.cancel();
       },

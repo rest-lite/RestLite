@@ -39,7 +39,7 @@ class _FileDownloadState extends State<FileDownload> {
   TaskControl<RestoreOutput>? task;
 
   void download(String snapshotID, String filePath, String downloadPath) async {
-    final _task = ResticService.taskManager.addTask(RestoreTask(
+    final _task = resticService.addTask(RestoreTask(
       "下载备份文件",
       widget.loginContext.savePath,
       widget.loginContext.password,

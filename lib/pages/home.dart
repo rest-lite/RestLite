@@ -42,8 +42,8 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    BackupService.instance.stop();
-    BackupRetentionCheckService.instance.stop();
+    BackupService.stop();
+    BackupRetentionCheckService.stop();
     super.dispose();
   }
 
@@ -64,13 +64,13 @@ class _HomeState extends State<Home> {
       }
     }
 
-    ResticService.taskManager.maxConcurrency = _settingContext.concurrencyLimit;
+    resticService.maxConcurrency = _settingContext.concurrencyLimit;
 
     if (!_settingContext.useBackupInterval) {
       log.fine("SettingView didUpdateWidget, useBackupInterval is false");
-      BackupService.instance.stop();
+      BackupService.stop();
     } else {
-      BackupService.instance.update(
+      BackupService.update(
         Duration(minutes: _settingContext.backupInterval),
         widget.loginContext.savePath,
         _settingContext.backupPaths,
@@ -80,9 +80,9 @@ class _HomeState extends State<Home> {
     if (!_settingContext.useBackupRetentionPeriod) {
       log.fine(
           "SettingView didUpdateWidget, useBackupRetentionPeriod is false");
-      BackupRetentionCheckService.instance.stop();
+      BackupRetentionCheckService.stop();
     } else {
-      BackupRetentionCheckService.instance.update(
+      BackupRetentionCheckService.update(
         Duration(minutes: _settingContext.checkInterval),
         _settingContext.backupRetentionPeriod,
         widget.loginContext.savePath,

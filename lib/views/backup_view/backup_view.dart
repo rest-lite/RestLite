@@ -110,7 +110,7 @@ class _BackupViewState extends State<BackupView> {
       _isBackingUp = true;
     });
 
-    backupTask = ResticService.taskManager.addTask(BackupTask(
+    backupTask = resticService.addTask(BackupTask(
         "主动备份",
         widget.settingContext.backupPaths,
         widget.loginContext.savePath,

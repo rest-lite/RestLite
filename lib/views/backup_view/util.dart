@@ -220,7 +220,7 @@ Future<List<Snapshot>> loadSnapshots(
   String repositoryPath,
   String password,
 ) async {
-  final task = ResticService.taskManager
+  final task = resticService
       .addTask(LoadSnapshotsTask("加载快照", repositoryPath, password));
 
   await for (final out in task.stream) {
@@ -237,7 +237,7 @@ Future<void> loadFiles(
   Set<Node> nodes,
   StreamController<Set<Node>> outStreamController,
 ) async {
-  final snapshotBox = ObjectBox.store.box<SnapshotStore>();
+  final snapshotBox = store.box<SnapshotStore>();
   for (var path in paths) {
     final query = (snapshotBox.query(
             SnapshotStore_.snapshotID.equals(snapshotID) &
@@ -254,7 +254,7 @@ Future<void> loadFiles(
     }
 
     final snapshotStore = SnapshotStore(snapshotID: snapshotID, path: path);
-    final loadFileTask = ResticService.taskManager.addTask(LoadFileTask(
+    final loadFileTask = resticService.addTask(LoadFileTask(
         "加载快照文件" + snapshotID, {path}, repositoryPath, password, snapshotID));
 
     DateTime? snapshotTime;

@@ -1,9 +1,7 @@
 import 'package:rest_lite/restic/task_manager.dart';
 
-class ResticService {
-  static late TaskManager taskManager;
+late final TaskManager resticService;
 
-  static void init(int maxConcurrency) {
-    taskManager = TaskManager(maxConcurrency);
-  }
+void init(int maxConcurrency) {
+  resticService = TaskManager(maxConcurrency);
 }

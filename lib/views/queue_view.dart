@@ -18,7 +18,7 @@ class _QueueViewState extends State<QueueView> {
   @override
   void initState() {
     super.initState();
-    listen = ResticService.taskManager.taskUpdate.stream
+    listen = resticService.taskUpdate.stream
         .throttleTime(
       const Duration(milliseconds: 500),
       trailing: true,
@@ -36,10 +36,8 @@ class _QueueViewState extends State<QueueView> {
 
   @override
   Widget build(BuildContext context) {
-    List<TaskControl<dynamic>> runningTasks =
-        ResticService.taskManager.runningTasks();
-    List<TaskControl<dynamic>> queuedTasks =
-        ResticService.taskManager.queuedTasks();
+    List<TaskControl<dynamic>> runningTasks = resticService.runningTasks();
+    List<TaskControl<dynamic>> queuedTasks = resticService.queuedTasks();
 
     return Scaffold(
       appBar: AppBar(
