@@ -226,7 +226,7 @@ class _LoginState extends State<Login> {
                       obscureText: true,
                       validator: _validatePassword,
                       onChanged: (value) async {
-                        if (_validatePassword(value) == null) return;
+                        if (_validatePassword(value) != null) return;
 
                         if (_keepPassword) {
                           await _prefer.setString(
