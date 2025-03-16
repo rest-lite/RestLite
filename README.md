@@ -24,13 +24,13 @@ RestLite是适用于windows平台的文件备份工具，提供简单直观的�
 
 ## 安装与使用
 
-请至 [GitHub Releases](https://github.com/RestLite/RestLite/releases) 进行下载
+请至 [GitHub Releases](https://github.com/rest-lite/RestLite/releases) 进行下载
 
 ## 卸载
 
 除应用与备份仓库外，还应该删除数据库与配置文件：
 
-缓存位置:
+数据库位置:
 `%userprofile%\Documents\RestLite`
 
 配置文件位置:
