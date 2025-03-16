@@ -1,0 +1,105 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:5734480712160315756",
+      "lastPropertyId": "9:6044424971685999167",
+      "name": "Node",
+      "properties": [
+        {
+          "id": "1:3609420518394727335",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:696118586686639294",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:9076755665869167754",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "4:922462461085338622",
+          "name": "path",
+          "type": 9
+        },
+        {
+          "id": "6:6161902437465017855",
+          "name": "snapshotsTime",
+          "type": 10
+        },
+        {
+          "id": "7:1907572023540325182",
+          "name": "snapshotID",
+          "type": 9
+        },
+        {
+          "id": "8:8065018162181887276",
+          "name": "modificationTime",
+          "type": 10
+        },
+        {
+          "id": "9:6044424971685999167",
+          "name": "size",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:3480043477491150079",
+      "lastPropertyId": "4:3417866942745308881",
+      "name": "SnapshotStore",
+      "properties": [
+        {
+          "id": "1:2025437476508099114",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1581803144817013017",
+          "name": "snapshotID",
+          "type": 9
+        },
+        {
+          "id": "4:3417866942745308881",
+          "name": "path",
+          "type": 9
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:6414176714550520157",
+          "name": "nodes",
+          "targetId": "1:5734480712160315756"
+        }
+      ]
+    }
+  ],
+  "lastEntityId": "3:3480043477491150079",
+  "lastIndexId": "0:0",
+  "lastRelationId": "1:6414176714550520157",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    3985636014253510616
+  ],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    1300404110958551942,
+    2475801554717342420,
+    4451935207168779745,
+    7143321217317096998,
+    1147791461221417266
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

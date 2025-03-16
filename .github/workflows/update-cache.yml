@@ -1,0 +1,47 @@
+name: Update Cache
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  update-flutter-cache:
+    name: Update flutter cache
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter environment with caching
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter --version
+
+  update-restic-cache:
+    name: Update restic cache
+    env:
+      RESTIC_VERSION: '0.17.3'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache restic binary
+        uses: actions/cache@v4
+        with:
+          path: restic.exe
+          key: restic-${{ env.RESTIC_VERSION }}
+
+      - name: Download and extract restic binary if not cached
+        run: |
+          if [ ! -f restic.exe ]; then
+            url="https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_windows_amd64.zip"
+            echo "Downloading restic from $url"
+            curl -LO $url
+            unzip -o restic_${RESTIC_VERSION}_windows_amd64.zip -d .
+            mv restic_${RESTIC_VERSION}_windows_amd64.exe restic.exe
+            rm -rf restic_${RESTIC_VERSION}_windows_amd64.zip
+          else
+            echo "Restic binary already cached."
+          fi

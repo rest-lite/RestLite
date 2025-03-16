@@ -1,0 +1,108 @@
+name: Flutter Windows Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter environment with caching
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Flutter Windows app
+        run: flutter build windows --release
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build/windows/x64/runner/Release
+
+  download_restic:
+    runs-on: ubuntu-latest
+    env:
+      RESTIC_VERSION: '0.17.3'
+    steps:
+      - name: Cache restic binary
+        uses: actions/cache@v4
+        with:
+          path: restic.exe
+          key: restic-${{ env.RESTIC_VERSION }}
+
+      - name: Download and extract restic binary if not cached
+        run: |
+          if [ ! -f restic.exe ]; then
+            url="https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_windows_amd64.zip"
+            echo "Downloading restic from $url"
+            curl -LO $url
+            unzip -o restic_${RESTIC_VERSION}_windows_amd64.zip -d .
+            mv restic_${RESTIC_VERSION}_windows_amd64.exe restic.exe
+            rm -rf restic_${RESTIC_VERSION}_windows_amd64.zip
+          else
+            echo "Restic binary already cached."
+          fi
+
+      - name: Upload restic binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: restic-binary
+          path: restic.exe
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [download_restic, build]
+    env:
+      TOP_LEVEL_DIR_NAME: 'rest_lite'
+    steps:
+      - name: Download restic artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: restic-binary
+          path: .
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: ${{ env.TOP_LEVEL_DIR_NAME }}
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Zip release artifact
+        run: |
+          mkdir -p ${{ env.TOP_LEVEL_DIR_NAME }}/bin
+          mv restic.exe ${{ env.TOP_LEVEL_DIR_NAME }}/bin/restic.exe
+          artifactName=release.zip
+          [ -f $artifactName ] && rm $artifactName
+          zip -r -q $artifactName ${{ env.TOP_LEVEL_DIR_NAME }}/*
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release.zip
+          asset_name: rest_lite_windows_x64.zip
+          asset_content_type: application/zip
