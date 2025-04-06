@@ -53,6 +53,10 @@ class BackupService {
   final Periodic _periodic;
   BackupService._internal(this._periodic);
 
+  static final StreamController<void> _controller =
+      StreamController.broadcast();
+  static final onCycleFinished = _controller.stream;
+
   static void init() {
     _instance = BackupService._internal(Periodic());
   }
@@ -77,13 +81,11 @@ class BackupService {
         switch (v) {
           case Msg<BackupOutput> v:
             outLogController.add(v.data);
-            break;
           case MakeWay<BackupOutput>():
             _instance.log.info("BackupService make way");
-            break;
           case Done<BackupOutput>():
             _instance.log.fine("BackupService done");
-            break;
+            _controller.add(null);
           case Cancel<BackupOutput>():
             _instance.log.fine("BackupService cancel");
         }
@@ -115,6 +117,10 @@ class BackupRetentionCheckService {
   final Periodic _periodic;
   BackupRetentionCheckService._internal(this._periodic);
 
+  static final StreamController<void> _controller =
+      StreamController.broadcast();
+  static final onCycleFinished = _controller.stream;
+
   static void init() {
     _instance = BackupRetentionCheckService._internal(Periodic());
   }
@@ -142,6 +148,7 @@ class BackupRetentionCheckService {
             _instance.log.info("cancel");
           case Done<ForgetGroup>():
             _instance.log.info("done");
+            _controller.add(null);
         }
       }
       // 移除快照缓存

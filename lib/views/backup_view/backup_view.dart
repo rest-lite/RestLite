@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../pages/home_navigator.dart';
 import '../../restic/json_type.dart';
 import '../../restic/tasks.dart';
+import '../../services/periodic.dart';
 import '../../services/restic.dart';
 import '../../util/string.dart';
 import 'directory_viewer.dart';
@@ -33,10 +34,22 @@ class BackupView extends StatefulWidget {
 }
 
 class _BackupViewState extends State<BackupView> {
+  final _nodesStreamController = StreamController<Set<Node>>();
+  final _backingUpStreamController = StreamController<BackupOutput>();
+  late final StreamSubscription _backupServiceSubscription;
+  late final StreamSubscription _retentionCheckSubscription;
+
   @override
   void initState() {
     super.initState();
     _loadFiles();
+    _backupServiceSubscription = BackupService.onCycleFinished.listen((_) {
+      _loadFiles();
+    });
+    _retentionCheckSubscription =
+        BackupRetentionCheckService.onCycleFinished.listen((_) {
+      _loadFiles();
+    });
   }
 
   @override
@@ -51,10 +64,12 @@ class _BackupViewState extends State<BackupView> {
   void dispose() {
     _nodesStreamController.close();
     _backingUpStreamController.close();
+    _backupServiceSubscription.cancel();
+    _retentionCheckSubscription.cancel();
     super.dispose();
   }
 
-  final _nodesStreamController = StreamController<Set<Node>>();
+  final Set<Node> nodes = {};
   late final _nodesStream = _nodesStreamController.stream
       .throttleTime(
     const Duration(milliseconds: 500),
@@ -63,7 +78,6 @@ class _BackupViewState extends State<BackupView> {
       .asyncMap((data) async {
     return await Isolate.run(() => buildDirectoryTree(data));
   });
-  final Set<Node> nodes = {};
   List<Snapshot>? snapshots;
 
   void _loadFiles() async {
@@ -94,7 +108,6 @@ class _BackupViewState extends State<BackupView> {
     }
   }
 
-  final _backingUpStreamController = StreamController<BackupOutput>();
   late final _backingUpStream = _backingUpStreamController.stream.throttleTime(
     const Duration(milliseconds: 500),
     trailing: true,
