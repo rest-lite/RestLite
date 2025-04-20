@@ -1,10 +1,12 @@
 # RestLite
 
+[English README](doc/README.en.md)
+
 RestLite是适用于windows平台的文件备份工具，提供简单直观的定时备份与恢复功能。
 
 本质为[restic](https://github.com/restic/restic) GUI
 
-![备份页面](doc/img/backup_view.png)
+![备份页面](doc/img/backup_view.zh.png)
 
 ## 功能
 
