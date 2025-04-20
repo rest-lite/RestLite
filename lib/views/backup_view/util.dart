@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/widgets.dart';
 import 'package:rest_lite/restic/task_manager.dart';
 
 import '../../objectbox.g.dart';
@@ -219,9 +221,12 @@ DirectoryNode buildDirectoryTree(Set<Node> originNodes) {
 Future<List<Snapshot>> loadSnapshots(
   String repositoryPath,
   String password,
+  BuildContext context,
 ) async {
-  final task = resticService
-      .addTask(LoadSnapshotsTask("加载快照", repositoryPath, password));
+  final task = resticService.addTask(LoadSnapshotsTask(
+      context.tr("backup_view.load_snapshots_list_task_name"),
+      repositoryPath,
+      password));
 
   await for (final out in task.stream) {
     if (out is Msg<List<Snapshot>>) return out.data;
@@ -236,6 +241,7 @@ Future<void> loadFiles(
   Set<String> paths,
   Set<Node> nodes,
   StreamController<Set<Node>> outStreamController,
+  BuildContext context,
 ) async {
   final snapshotBox = store.box<SnapshotStore>();
   for (var path in paths) {
@@ -255,7 +261,12 @@ Future<void> loadFiles(
 
     final snapshotStore = SnapshotStore(snapshotID: snapshotID, path: path);
     final loadFileTask = resticService.addTask(LoadFileTask(
-        "加载快照文件" + snapshotID, {path}, repositoryPath, password, snapshotID));
+      context.tr("backup_view.load_snapshots_file_task_name"),
+      {path},
+      repositoryPath,
+      password,
+      snapshotID,
+    ));
 
     DateTime? snapshotTime;
     await for (final data in loadFileTask.stream) {

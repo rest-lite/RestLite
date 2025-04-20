@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -63,14 +64,14 @@ class _RetentionCardState extends State<RetentionCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
                     Text(
-                      "自动删除备份快照",
+                      context.tr("setting_view.auto_delete"),
                     ),
                     Tooltip(
-                      message: '以应用运行时间为准，定期检查快照是否过期并删除过期快照',
-                      child: Icon(
+                      message: context.tr("setting_view.auto_delete_tip"),
+                      child: const Icon(
                         Icons.help_outline,
                         size: 20,
                       ),
@@ -96,16 +97,16 @@ class _RetentionCardState extends State<RetentionCard> {
               enabled: _enable,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: '快照保留时间',
-                hintText: '每个快照的保留时间，过期后会被删除',
-                suffix: Text('天'),
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.schedule),
+              decoration: InputDecoration(
+                labelText: context.tr("setting_view.retention_time"),
+                hintText: context.tr("setting_view.retention_time_tip"),
+                suffix: Text(context.tr("setting_view.retention_time_suffix")),
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.schedule),
               ),
-              validator: validateNonZeroInput,
+              validator: (v) => validateNonZeroInput(context, v),
               onChanged: (value) async {
-                if (validateNonZeroInput(value) != null) {
+                if (validateNonZeroInput(context, value) != null) {
                   return;
                 }
                 widget.onUpdate(
@@ -120,16 +121,19 @@ class _RetentionCardState extends State<RetentionCard> {
               enabled: _enable,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: '检查周期',
-                hintText: '检查并删除过期快照的周期',
-                suffix: Text('分钟'),
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.schedule),
+              decoration: InputDecoration(
+                labelText:
+                    context.tr("setting_view.auto_delete_check_interval"),
+                hintText: context
+                    .tr("setting_view.auto_delete_check_interval_hint_text"),
+                suffix: Text(context
+                    .tr("setting_view.auto_delete_check_interval_suffix")),
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.schedule),
               ),
-              validator: validateNonZeroInput,
+              validator: (v) => validateNonZeroInput(context, v),
               onChanged: (value) async {
-                if (validateNonZeroInput(value) != null) {
+                if (validateNonZeroInput(context, value) != null) {
                   return;
                 }
                 widget.onUpdate(
@@ -145,8 +149,8 @@ class _RetentionCardState extends State<RetentionCard> {
   }
 }
 
-String? validateNonZeroInput(String? value) {
-  const errTip = '请输入不为零的数';
+String? validateNonZeroInput(BuildContext context, String? value) {
+  final errTip = context.tr("setting_view.number_validation_hint");
   if (value == null || value.isEmpty) {
     return errTip;
   }

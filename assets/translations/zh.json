@@ -1,0 +1,107 @@
+{
+    "cancel": "取消",
+    "ok": "好的",
+    "confirm": "确认",
+    "success": "成功",
+    "tray": {
+        "tooltip": "文件备份",
+        "menu_show": "显示",
+        "menu_hide": "隐藏",
+        "menu_exit": "退出"
+    },
+    "login": {
+        "check_repository": "正在检查储存库",
+        "create_repository": "数据库不存在，正在创建",
+        "repository_path_not_exist": "备份储存位置不存在，请更换或创建",
+        "repository_path_label_text": "备份快照储存位置",
+        "repository_path_hint_text": "请选择目录",
+        "repository_validator_tip": "请选择备份储存位置",
+        "repository_path_select_button": "选择",
+        "keep_password": "记住密码",
+        "keep_password_tip": "记住密码并自动载入备份仓库",
+        "password_label_text": "备份快照加密密码",
+        "password_wrong": "密码错误，请重新输入密码",
+        "password_validation_hint": "请输入密码"
+    },
+    "home": {
+        "backup_view_navigation": "备份",
+        "task_view_navigation": "任务",
+        "setting_view_navigation": "设置",
+        "exit": "退出"
+    },
+    "file_detail": {
+        "download": "下载",
+        "unknown_file_size": "大小未知",
+        "file_size": "大小: {size}",
+        "file_modification_time": "上一次修改日期: {date}"
+    },
+    "file_download": {
+        "download_task_name": "下载备份文件",
+        "downloading": "下载中",
+        "download_success": "下载成功",
+        "downloaded_info": "已下载: {downloaded}(跳过{skipped})",
+        "total_size": "总大小: {size}",
+        "seconds_elapsed": "已花费时间: {second}秒",
+        "download_cancel": "取消下载"
+    },
+    "periodic_task": {
+        "auto_backup": "自动备份",
+        "retention_check": "快照过期检查"
+    },
+    "backup_view": {
+        "backup_task_name": "手动备份",
+        "backup_success": "备份完成",
+        "backup_cancel": "备份取消",
+        "no_snapshots": "空",
+        "start_backup": "开始备份",
+        "cancel_backup": "取消备份",
+        "seconds_elapsed": "已花费时间: {second}秒",
+        "total_files": "总文件数量: {number}",
+        "files_done": "已完成备份文件数量: {number}",
+        "snapshot_number": "快照数量: {number}",
+        "backup_target_empty_dialog_title": "尚未设置备份目标",
+        "backup_target_empty_dialog_text": "请先于设置中添加备份目标",
+        "file_version_number": "版本数量: {number}",
+        "load_snapshots_list_task_name": "加载快照列表",
+        "load_snapshots_file_task_name": "加载快照文件"
+    },
+    "setting_view": {
+        "target_paths": "备份目标",
+        "target_paths_tip": "将会对选中目录进行备份",
+        "target_path_exist": "目录已存在: {path}",
+        "add_target_path_button": "添加目录",
+        "add_target_path_success": "已添加目录: {path}",
+        "target_path_deleted": "已删除目录: {path}",
+        "auto_backup": "自动备份",
+        "auto_backup_tip": "以应用运行时间为准，定期执行备份",
+        "backup_interval": "备份间隔",
+        "backup_interval_hint_text": "自动备份的间隔时长",
+        "backup_interval_suffix": "分钟",
+        "number_validation_hint": "请输入不为零的整数",
+        "delete_target_path_dialog_title": "删除备份目标",
+        "delete_target_path_dialog_content": "确认删除目录{path}?",
+        "auto_delete": "自动删除备份快照",
+        "auto_delete_tip": "以应用运行时间为准，定期检查快照是否过期并删除过期快照",
+        "retention_time": "快照保留时间",
+        "retention_time_tip": "每个快照的保留时间，过期后会被删除",
+        "retention_time_suffix": "天",
+        "auto_delete_check_interval": "检查周期",
+        "auto_delete_check_interval_hint_text": "检查周期",
+        "auto_delete_check_interval_suffix": "分钟",
+        "system_setting": "系统设置",
+        "concurrency_limit": "并发限制",
+        "concurrency_limit_hint_text": "允许并发执行的任务数量限制",
+        "concurrency_limit_suffix": "个",
+        "auto_startup": "开机启动"
+    },
+    "queue_view": {
+        "view_title": "任务队列",
+        "running_tasks_title": "正在运行任务",
+        "queued_tasks_title": "等待任务",
+        "empty_queue": "暂无任务",
+        "task_is_concurrent": "支持并行: 是",
+        "task_is_not_concurrent": "支持并行: 否",
+        "immediately_tip": "立即执行",
+        "cancel_tip": "取消任务"
+    }
+}

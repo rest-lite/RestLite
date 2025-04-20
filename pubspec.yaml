@@ -44,6 +44,7 @@ dependencies:
   shared_preferences: ^2.3.2
   tray_manager: ^0.3.1
   launch_at_startup: ^0.3.1
+  easy_localization: ^3.0.7+1
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/
+    - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

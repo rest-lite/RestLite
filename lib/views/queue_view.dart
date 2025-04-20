@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -41,15 +42,16 @@ class _QueueViewState extends State<QueueView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("任务队列"),
+        title: Text(context.tr("queue_view.view_title")),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
-            _buildTaskSection(
-                "正在运行任务", runningTasks, Icons.play_arrow, Colors.green),
-            _buildTaskSection("等待任务", queuedTasks, Icons.queue, Colors.orange),
+            _buildTaskSection(context.tr("queue_view.running_tasks_title"),
+                runningTasks, Icons.play_arrow, Colors.green),
+            _buildTaskSection(context.tr("queue_view.queued_tasks_title"),
+                queuedTasks, Icons.queue, Colors.orange),
           ],
         ),
       ),
@@ -69,9 +71,9 @@ class _QueueViewState extends State<QueueView> {
           ),
           const Divider(),
           if (tasks.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("暂无任务"),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(context.tr("queue_view.empty_queue")),
             )
           else
             ...tasks.asMap().entries.map((entry) {
@@ -80,14 +82,16 @@ class _QueueViewState extends State<QueueView> {
               return ListTile(
                 leading: Icon(icon, color: iconColor),
                 title: Text(taskControl.name),
-                subtitle: Text("支持并行: ${isConcurrent ? '是' : '否'}"),
+                subtitle: Text(isConcurrent
+                    ? context.tr("queue_view.task_is_concurrent")
+                    : context.tr("queue_view.task_is_not_concurrent")),
                 trailing: Wrap(
                   spacing: 8,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.play_circle_fill,
                           color: Colors.blue),
-                      tooltip: "立即执行",
+                      tooltip: context.tr("queue_view.immediately_tip"),
                       onPressed: () {
                         taskControl.immediately();
                         setState(() {});
@@ -95,7 +99,7 @@ class _QueueViewState extends State<QueueView> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.cancel, color: Colors.red),
-                      tooltip: "取消任务",
+                      tooltip: context.tr("queue_view.cancel_tip"),
                       onPressed: () {
                         taskControl.cancel();
                         setState(() {});

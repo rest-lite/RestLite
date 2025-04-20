@@ -9,8 +9,8 @@ import '../views/backup_view/util.dart';
 import 'file_detail.dart';
 import 'home.dart';
 
-class HomeNavigator extends StatefulWidget {
-  const HomeNavigator(
+class ViewNavigator extends StatefulWidget {
+  const ViewNavigator(
       {Key? key, required this.loginContext, required this.exit})
       : super(key: key);
 
@@ -18,12 +18,12 @@ class HomeNavigator extends StatefulWidget {
 
   final void Function() exit;
   @override
-  State<HomeNavigator> createState() => _HomeNavigatorState();
+  State<ViewNavigator> createState() => _ViewNavigatorState();
 }
 
-final log = Logger('Home');
+final log = Logger('HomeView');
 
-class _HomeNavigatorState extends State<HomeNavigator> implements PageBuild {
+class _ViewNavigatorState extends State<ViewNavigator> implements PageBuild {
   final Queue<Page<dynamic>> pages = Queue();
   @override
   void initState() {

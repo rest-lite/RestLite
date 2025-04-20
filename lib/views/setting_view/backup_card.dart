@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -55,14 +56,14 @@ class _BackupCardState extends State<BackupCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
                     Text(
-                      "自动备份",
+                      context.tr("setting_view.auto_backup"),
                     ),
                     Tooltip(
-                      message: '以应用运行时间为准，定期执行备份',
-                      child: Icon(
+                      message: context.tr("setting_view.auto_backup_tip"),
+                      child: const Icon(
                         Icons.help_outline,
                         size: 20,
                       ),
@@ -85,16 +86,16 @@ class _BackupCardState extends State<BackupCard> {
               enabled: _enable,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: '备份间隔时间',
-                hintText: '每次自动备份的间隔时间',
-                suffix: Text('分钟'),
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.schedule),
+              decoration: InputDecoration(
+                labelText: context.tr("setting_view.backup_interval"),
+                hintText: context.tr("setting_view.backup_interval_hint_text"),
+                suffix: Text(context.tr("setting_view.backup_interval_suffix")),
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.schedule),
               ),
-              validator: validateNonZeroInput,
+              validator: (v) => validateNonZeroInput(context, v),
               onChanged: (value) async {
-                if (validateNonZeroInput(value) != null) {
+                if (validateNonZeroInput(context, value) != null) {
                   return;
                 }
                 widget.onUpdate(_enable, int.parse(controller.text));
@@ -107,8 +108,8 @@ class _BackupCardState extends State<BackupCard> {
   }
 }
 
-String? validateNonZeroInput(String? value) {
-  const errTip = '请输入不为零的数';
+String? validateNonZeroInput(BuildContext context, String? value) {
+  final errTip = context.tr("setting_view.number_validation_hint");
   if (value == null || value.isEmpty) {
     return errTip;
   }

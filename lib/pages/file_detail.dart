@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -5,7 +6,7 @@ import 'package:logging/logging.dart';
 import '../util/string.dart';
 import '../views/backup_view/directory_viewer.dart';
 import '../views/backup_view/util.dart';
-import 'home_navigator.dart';
+import 'view_navigator.dart';
 
 class FileDetail extends StatefulWidget {
   const FileDetail({
@@ -61,14 +62,20 @@ class _FileDetailState extends State<FileDetail> {
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           leading: const Icon(Icons.insert_drive_file),
-                          title:
-                              Text('上一次修改日期: ${snapshot.fileModificationTime}'),
-                          subtitle: Text(
-                              "大小: ${snapshot.size == null ? '未知' : formatBytes(snapshot.size!)}"),
+                          title: Text(context.tr(
+                              "file_detail.file_modification_time",
+                              namedArgs: {
+                                "date": snapshot.fileModificationTime.toString()
+                              })),
+                          subtitle: Text(snapshot.size == null
+                              ? context.tr("file_detail.unknown_file_size")
+                              : context.tr("file_detail.file_size", namedArgs: {
+                                  "size": formatBytes(snapshot.size!)
+                                })),
                           trailing: ElevatedButton(
                             onPressed: () => download(snapshot.id,
                                 widget.fileInfo.name, widget.fileInfo.path),
-                            child: const Text('下载'),
+                            child: Text(context.tr("file_detail.download")),
                           ),
                         ),
                       );

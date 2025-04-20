@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class DeleteDialog extends StatelessWidget {
@@ -8,21 +9,24 @@ class DeleteDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('删除备份目标'),
-      content: Text("确认删除目录$path?"),
+      title: Text(context.tr("setting_view.delete_target_path_dialog_title")),
+      content: Text(context.tr(
+        "setting_view.delete_target_path_dialog_context",
+        namedArgs: {"path": path},
+      )),
       actions: <Widget>[
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('取消'),
+          child: Text(context.tr("cancel")),
         ),
         TextButton(
           onPressed: () {
             onConfirm();
             Navigator.pop(context);
           },
-          child: const Text('确定'),
+          child: Text(context.tr("confirm")),
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'util.dart';
@@ -57,7 +58,8 @@ class DirectoryViewer extends StatelessWidget {
     showDetail(info);
   }
 
-  Widget _buildDirectoryItem(DirectoryNode node, int depth) {
+  Widget _buildDirectoryItem(
+      DirectoryNode node, int depth, BuildContext context) {
     final double indent = depth * 8.0; // 根据深度设置缩进
     if (node.isDirectory) {
       final initiallyExpanded = depth < 2;
@@ -78,7 +80,8 @@ class DirectoryViewer extends StatelessWidget {
           ),
           title: Text(node.name),
           children: node.children
-                  ?.map((child) => _buildDirectoryItem(child, depth + 1))
+                  ?.map(
+                      (child) => _buildDirectoryItem(child, depth + 1, context))
                   .toList() ??
               [
                 Container(
@@ -102,7 +105,8 @@ class DirectoryViewer extends StatelessWidget {
             icon: const Icon(Icons.more_vert),
           ),
           title: Text(node.name),
-          subtitle: Text("版本数量${node.snapshots.length}"),
+          subtitle: Text(context.tr("backup_view.file_version_number",
+              namedArgs: {"number": node.snapshots.length.toString()})),
         ),
       );
     }
@@ -111,7 +115,7 @@ class DirectoryViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: [_buildDirectoryItem(root, 0)],
+      children: [_buildDirectoryItem(root, 0, context)],
     );
   }
 }

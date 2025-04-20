@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rest_lite/restic/task_manager.dart';
 import 'package:rest_lite/views/setting_view/setting_view.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../pages/home_navigator.dart';
+import '../../pages/view_navigator.dart';
 import '../../restic/json_type.dart';
 import '../../restic/tasks.dart';
 import '../../services/periodic.dart';
@@ -42,13 +43,15 @@ class _BackupViewState extends State<BackupView> {
   @override
   void initState() {
     super.initState();
-    _loadFiles();
-    _backupServiceSubscription = BackupService.onCycleFinished.listen((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFiles();
-    });
-    _retentionCheckSubscription =
-        BackupRetentionCheckService.onCycleFinished.listen((_) {
-      _loadFiles();
+      _backupServiceSubscription = BackupService.onCycleFinished.listen((_) {
+        _loadFiles();
+      });
+      _retentionCheckSubscription =
+          BackupRetentionCheckService.onCycleFinished.listen((_) {
+        _loadFiles();
+      });
     });
   }
 
@@ -84,6 +87,7 @@ class _BackupViewState extends State<BackupView> {
     snapshots = await loadSnapshots(
       widget.loginContext.savePath,
       widget.loginContext.password,
+      context,
     );
 
     // 刷新snapshots信息
@@ -104,6 +108,7 @@ class _BackupViewState extends State<BackupView> {
             .toSet(),
         nodes,
         _nodesStreamController,
+        context,
       );
     }
   }
@@ -124,7 +129,7 @@ class _BackupViewState extends State<BackupView> {
     });
 
     backupTask = resticService.addTask(BackupTask(
-        "主动备份",
+        context.tr("backup_view.backup_task_name"),
         widget.settingContext.backupPaths,
         widget.loginContext.savePath,
         widget.loginContext.password));
@@ -138,10 +143,10 @@ class _BackupViewState extends State<BackupView> {
           break;
         case Done<BackupOutput>():
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('备份完成'),
+            content: Text(context.tr("backup_view.backup_success")),
             backgroundColor: Theme.of(context).colorScheme.primary,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onPrimary,
             ),
@@ -149,10 +154,10 @@ class _BackupViewState extends State<BackupView> {
           break;
         case Cancel<BackupOutput>():
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('备份取消'),
+            content: Text(context.tr("backup_view.backup_cancel")),
             backgroundColor: Theme.of(context).colorScheme.secondary,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onSecondary,
             ),
@@ -184,8 +189,8 @@ class _BackupViewState extends State<BackupView> {
         );
         if (snapshot.data != null) {
           if ((snapshot.data!.children?.isEmpty ?? true)) {
-            directoryViewer = const Center(
-              child: Text("空"),
+            directoryViewer = Center(
+              child: Text(context.tr("backup_view.no_snapshots")),
             );
           } else {
             directoryViewer = DirectoryViewer(
@@ -199,6 +204,7 @@ class _BackupViewState extends State<BackupView> {
                     {dir},
                     nodes,
                     _nodesStreamController,
+                    context,
                   );
                 }
               },
@@ -217,14 +223,17 @@ class _BackupViewState extends State<BackupView> {
                       children: [
                         OutlinedButton(
                             onPressed: _isBackingUp ? null : _backup,
-                            child: const Text("开始备份")),
+                            child:
+                                Text(context.tr("backup_view.start_backup"))),
                         if (_isBackingUp)
                           const SizedBox(
                             height: 8,
                           ),
                         if (_isBackingUp)
                           OutlinedButton(
-                              onPressed: _cancel, child: const Text("取消备份")),
+                              onPressed: _cancel,
+                              child: Text(
+                                  context.tr("backup_view.cancel_backup"))),
                       ],
                     ),
                     if (_isBackingUp)
@@ -239,12 +248,22 @@ class _BackupViewState extends State<BackupView> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                    "已花费时间：${snapshot.data?.secondsElapsed.toString()}秒"),
-                                Text(
-                                    "总文件数量：${snapshot.data?.totalFiles.toString()}"),
-                                Text(
-                                    "已完成备份文件数量：${snapshot.data?.filesDone.toString()}"),
+                                Text(context.tr("backup_view.seconds_elapsed",
+                                    namedArgs: {
+                                      "second": snapshot.data?.secondsElapsed
+                                              .toString() ??
+                                          ""
+                                    })),
+                                Text(context
+                                    .tr("backup_view.total_files", namedArgs: {
+                                  "number":
+                                      snapshot.data?.totalFiles.toString() ?? ""
+                                })),
+                                Text(context
+                                    .tr("backup_view.files_done", namedArgs: {
+                                  "number":
+                                      snapshot.data?.filesDone.toString() ?? ""
+                                })),
                               ],
                             );
                           }),
@@ -254,7 +273,10 @@ class _BackupViewState extends State<BackupView> {
                     ),
                     Column(
                       children: [
-                        Text("快照数量: ${snapshots?.length}"),
+                        Text(context.tr("backup_view.snapshot_number",
+                            namedArgs: {
+                              "number": snapshots?.length.toString() ?? ""
+                            })),
                       ],
                     ),
                   ],
@@ -274,17 +296,18 @@ class _BackupViewState extends State<BackupView> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('尚未设置备份目标'),
-          content: const SingleChildScrollView(
+          title:
+              Text(context.tr("backup_view.backup_target_empty_dialog_title")),
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('请先于设置中添加备份目标'),
+                Text(context.tr("backup_view.backup_target_empty_dialog_text")),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('确认'),
+              child: Text(context.tr("confirm")),
               onPressed: () {
                 Navigator.of(context).pop();
               },

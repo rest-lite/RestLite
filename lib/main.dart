@@ -1,11 +1,12 @@
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'pages/home_navigator.dart';
+import 'pages/view_navigator.dart';
 import 'pages/login.dart';
 import 'services/periodic.dart';
 import 'services/restic.dart' as restic_service;
@@ -43,24 +44,57 @@ Future<void> main() async {
   log.init();
   await store.init();
   restic_service.init(5);
-  BackupService.init();
-  BackupRetentionCheckService.init();
 
-  runApp(const App());
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
+  runApp(EasyLocalization(
+    supportedLocales: const [Locale('en'), Locale('zh')],
+    path: 'assets/translations',
+    fallbackLocale: const Locale('zh'),
+    child: const App(),
+  ));
 }
 
-class App extends StatefulWidget {
+class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
 
   @override
-  State<App> createState() => _AppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Rest Lite',
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      theme: ThemeData(
+        // https://github.com/flutter/flutter/issues/103811#issuecomment-1849033360
+        fontFamily: Platform.isWindows ? "Microsoft YaHei" : null,
+      ),
+      home: const PageNavigator(),
+    );
+  }
 }
 
-class _AppState extends State<App> with TrayListener {
+class CustomWindowListener extends WindowListener {
+  @override
+  void onWindowClose() async {
+    // 隐藏窗口而不是关闭
+    await windowManager.hide();
+  }
+}
+
+class PageNavigator extends StatefulWidget {
+  const PageNavigator({super.key});
+
+  @override
+  State<PageNavigator> createState() => _PageNavigatorState();
+}
+
+class _PageNavigatorState extends State<PageNavigator> with TrayListener {
   @override
   void initState() {
-    trayManager.addListener(this);
     super.initState();
+    trayManager.addListener(this);
     _initTray();
   }
 
@@ -70,33 +104,59 @@ class _AppState extends State<App> with TrayListener {
     super.dispose();
   }
 
+  @override
+  Future<void> onTrayIconMouseDown() async {
+    bool visible = await windowManager.isVisible();
+    if (visible) {
+      await windowManager.hide();
+    } else {
+      await windowManager.show();
+    }
+  }
+
+  @override
+  void onTrayIconMouseUp() {}
+
+  @override
+  void onTrayIconRightMouseDown() {
+    // bringAppToFront 可以起到更新菜单隐藏状态的效果
+    // https://github.com/leanflutter/tray_manager/issues/63#issuecomment-2700179592
+    trayManager.popUpContextMenu(bringAppToFront: true);
+  }
+
+  @override
+  void onTrayIconRightMouseUp() {}
+
+  @override
+  void onTrayMenuItemClick(MenuItem menuItem) {}
+
   Future<void> _initTray() async {
     // 注意：Windows 平台需要使用 .ico 格式，其他平台可用 .png
     await trayManager.setIcon(
       Platform.isWindows ? 'assets/tray_icon.ico' : 'assets/tray_icon.png',
     );
-    trayManager.setToolTip("文件备份");
+    trayManager.setToolTip(context.tr('tray.tooltip'));
 
     // 定义一个只有“退出”菜单项的简单菜单
     Menu menu = Menu(
       items: [
         MenuItem(
           key: 'show',
-          label: '显示',
+          label: context.tr('tray.menu_show'),
           onClick: (item) {
             windowManager.show();
           },
         ),
         MenuItem(
           key: 'show',
-          label: '隐藏',
+          label: context.tr('tray.menu_hide'),
           onClick: (item) {
             windowManager.hide();
           },
         ),
         MenuItem(
             key: 'exit',
-            label: '退出',
+            label: context.tr('tray.menu_exit'),
             onClick: (item) async {
               await windowManager.setPreventClose(false);
               windowManager.close();
@@ -132,6 +192,9 @@ class _AppState extends State<App> with TrayListener {
 
   @override
   Widget build(BuildContext context) {
+    BackupService.build(context);
+    BackupRetentionCheckService.build(context);
+
     final login = MaterialPage(
         key: const ValueKey('login'),
         child: Login(
@@ -145,56 +208,16 @@ class _AppState extends State<App> with TrayListener {
       if (_loginContext != null)
         MaterialPage(
             key: const ValueKey('home'),
-            child: HomeNavigator(
+            child: ViewNavigator(
               key: const ValueKey('homeNavigator'),
               loginContext: _loginContext,
               exit: _exit,
             )),
     ];
 
-    return MaterialApp(
-        title: 'Rest Lite',
-        theme: ThemeData(
-          // https://github.com/flutter/flutter/issues/103811#issuecomment-1849033360
-          fontFamily: Platform.isWindows ? "微软雅黑" : null,
-        ),
-        home: Navigator(
-          pages: pages,
-          onDidRemovePage: (page) {},
-        ));
-  }
-
-  @override
-  Future<void> onTrayIconMouseDown() async {
-    bool visible = await windowManager.isVisible();
-    if (visible) {
-      await windowManager.hide();
-    } else {
-      await windowManager.show();
-    }
-  }
-
-  @override
-  void onTrayIconMouseUp() {}
-
-  @override
-  void onTrayIconRightMouseDown() {
-    // bringAppToFront 可以起到更新菜单隐藏状态的效果
-    // https://github.com/leanflutter/tray_manager/issues/63#issuecomment-2700179592
-    trayManager.popUpContextMenu(bringAppToFront: true);
-  }
-
-  @override
-  void onTrayIconRightMouseUp() {}
-
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) {}
-}
-
-class CustomWindowListener extends WindowListener {
-  @override
-  void onWindowClose() async {
-    // 隐藏窗口而不是关闭
-    await windowManager.hide();
+    return Navigator(
+      pages: pages,
+      onDidRemovePage: (page) {},
+    );
   }
 }

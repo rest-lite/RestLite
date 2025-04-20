@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:core';
 
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rest_lite/restic/task_manager.dart';
 import 'package:rxdart/rxdart.dart';
@@ -47,18 +50,20 @@ class Periodic {
 }
 
 class BackupService {
-  static late BackupService _instance;
+  static BackupService? _instance;
   final log = Logger('Periodic Service');
+  final Periodic periodic;
+  late BuildContext context;
 
-  final Periodic _periodic;
-  BackupService._internal(this._periodic);
+  BackupService._internal(this.periodic);
 
   static final StreamController<void> _controller =
       StreamController.broadcast();
   static final onCycleFinished = _controller.stream;
 
-  static void init() {
-    _instance = BackupService._internal(Periodic());
+  static void build(BuildContext context) {
+    _instance ??= BackupService._internal(Periodic());
+    _instance!.context = context;
   }
 
   // TODO: 尚未处理一次备份未完成时到达备份间隔立即开始第二次备份的问题
@@ -68,12 +73,18 @@ class BackupService {
     List<String> backupPaths,
     String password,
   ) {
-    _instance.log.info("BackupService update");
-    _instance._periodic.update(duration, () async {
-      _instance.log.info("BackupService run");
+    final instance = _instance;
+    if (instance == null) throw Error();
 
-      final backupTask = resticService
-          .addTask(BackupTask("自动备份", backupPaths, repositoryPath, password));
+    instance.log.info("BackupService update");
+    instance.periodic.update(duration, () async {
+      instance.log.info("BackupService run");
+
+      final backupTask = resticService.addTask(BackupTask(
+          instance.context.tr("periodic_task.auto_backup"),
+          backupPaths,
+          repositoryPath,
+          password));
 
       final outLogController = StreamController<BackupOutput>();
 
@@ -82,12 +93,12 @@ class BackupService {
           case Msg<BackupOutput> v:
             outLogController.add(v.data);
           case MakeWay<BackupOutput>():
-            _instance.log.info("BackupService make way");
+            instance.log.info("BackupService make way");
           case Done<BackupOutput>():
-            _instance.log.fine("BackupService done");
+            instance.log.fine("BackupService done");
             _controller.add(null);
           case Cancel<BackupOutput>():
-            _instance.log.fine("BackupService cancel");
+            instance.log.fine("BackupService cancel");
         }
       });
 
@@ -97,7 +108,7 @@ class BackupService {
             trailing: true,
           )
           .listen((v) =>
-              _instance.log.fine("total:${v.totalBytes} done: ${v.bytesDone}"));
+              instance.log.fine("total:${v.totalBytes} done: ${v.bytesDone}"));
 
       await backupTask.stream.last;
       outLogController.close();
@@ -105,24 +116,29 @@ class BackupService {
   }
 
   static void stop() {
-    _instance.log.fine("BackupService stop");
-    _instance._periodic.stop();
+    final instance = _instance;
+    if (instance == null) throw Error();
+
+    instance.log.fine("BackupService stop");
+    instance.periodic.stop();
   }
 }
 
 class BackupRetentionCheckService {
-  static late BackupRetentionCheckService _instance;
+  static BackupRetentionCheckService? _instance;
   final log = Logger('DeleteService');
+  final Periodic periodic;
+  late BuildContext context;
 
-  final Periodic _periodic;
-  BackupRetentionCheckService._internal(this._periodic);
+  BackupRetentionCheckService._internal(this.periodic);
 
   static final StreamController<void> _controller =
       StreamController.broadcast();
   static final onCycleFinished = _controller.stream;
 
-  static void init() {
-    _instance = BackupRetentionCheckService._internal(Periodic());
+  static void build(BuildContext context) {
+    _instance ??= BackupRetentionCheckService._internal(Periodic());
+    _instance!.context = context;
   }
 
   static void update(
@@ -131,12 +147,18 @@ class BackupRetentionCheckService {
     String repositoryPath,
     String password,
   ) {
-    _instance.log.info("update");
-    _instance._periodic.update(duration, () async {
-      _instance.log.info("run");
+    final instance = _instance;
+    if (instance == null) throw Error();
 
-      final backupTask = resticService.addTask(
-          DeleteSnapshotsTask("尝试删除过期备份", keepDay, repositoryPath, password));
+    instance.log.info("update");
+    instance.periodic.update(duration, () async {
+      instance.log.info("run");
+
+      final backupTask = resticService.addTask(DeleteSnapshotsTask(
+          instance.context.tr("periodic_task.retention_check"),
+          keepDay,
+          repositoryPath,
+          password));
 
       List<Snapshot> removes = [];
       await for (final v in backupTask.stream) {
@@ -145,29 +167,53 @@ class BackupRetentionCheckService {
             removes.addAll(v.data.remove ?? []);
           case MakeWay<ForgetGroup>():
           case Cancel<ForgetGroup>():
-            _instance.log.info("cancel");
+            instance.log.info("cancel");
           case Done<ForgetGroup>():
-            _instance.log.info("done");
+            instance.log.info("done");
             _controller.add(null);
         }
       }
       // 移除快照缓存
       if (removes.isNotEmpty) {
-        _instance.log.info("remove len:", removes.length.toString());
+        instance.log.info("remove len:", removes.length.toString());
         final box = store.box<SnapshotStore>();
         for (final v in removes) {
           final query =
               box.query(SnapshotStore_.snapshotID.equals(v.id)).build();
           box.removeMany(query.findIds());
           query.close();
-          _instance.log.info("remove cache: ${v.id}");
+          instance.log.info("remove cache: ${v.id}");
         }
       }
     });
   }
 
   static void stop() {
-    _instance.log.fine("stop");
-    _instance._periodic.stop();
+    final instance = _instance;
+    if (instance == null) throw Error();
+
+    instance.log.fine("stop");
+    instance.periodic.stop();
+  }
+}
+
+class ListItem {
+  String itemName;
+  int quantity;
+
+  // 私有构造函数
+  ListItem._(this.itemName, this.quantity);
+
+  // 静态实例
+  static ListItem? _instance;
+
+  // 获取实例的方法
+  static ListItem getInstance(String itemName, int quantity) {
+    _instance ??= ListItem._(itemName, quantity);
+    return _instance!;
+  }
+
+  void display() {
+    print("Item: $itemName, Quantity: $quantity");
   }
 }

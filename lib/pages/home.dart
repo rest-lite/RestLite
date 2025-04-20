@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:logging/logging.dart';
@@ -8,7 +9,7 @@ import 'package:rest_lite/views/setting_view/setting_view.dart';
 
 import '../services/restic.dart';
 import '../views/backup_view/util.dart';
-import 'home_navigator.dart';
+import 'view_navigator.dart';
 
 class Home extends StatefulWidget {
   const Home({
@@ -126,18 +127,18 @@ class _HomeState extends State<Home> {
             child: NavigationRail(
               extended: false,
               labelType: NavigationRailLabelType.all,
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.insert_drive_file),
-                  label: Text('备份'),
+                  icon: const Icon(Icons.insert_drive_file),
+                  label: Text(context.tr("home.backup_view_navigation")),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.view_list),
-                  label: Text('任务'),
+                  icon: const Icon(Icons.view_list),
+                  label: Text(context.tr("home.task_view_navigation")),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text('设置'),
+                  icon: const Icon(Icons.settings),
+                  label: Text(context.tr("home.setting_view_navigation")),
                 ),
               ],
               trailing: Expanded(
@@ -147,7 +148,7 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsets.all(10),
                     child: ElevatedButton(
                       onPressed: widget.exit,
-                      child: const Text("退出"),
+                      child: Text(context.tr("home.exit")),
                     ),
                   ),
                 ),

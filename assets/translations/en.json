@@ -1,0 +1,107 @@
+{
+    "cancel": "Cancel",
+    "ok": "OK",
+    "confirm": "Confirm",
+    "success": "Success",
+    "tray": {
+        "tooltip": "File Backup",
+        "menu_show": "Show",
+        "menu_hide": "Hide",
+        "menu_exit": "Exit"
+    },
+    "login": {
+        "check_repository": "Checking repository",
+        "create_repository": "Repository not found, creating",
+        "repository_path_not_exist": "Backup storage location does not exist. Please choose or create one",
+        "repository_path_label_text": "Backup snapshot storage location",
+        "repository_path_hint_text": "Please select a directory",
+        "repository_validator_tip": "Please choose a backup storage location",
+        "repository_path_select_button": "Select",
+        "keep_password": "Remember password",
+        "keep_password_tip": "Remember the password and automatically load the backup repository",
+        "password_label_text": "Backup snapshot encryption password",
+        "password_wrong": "Incorrect password, please try again",
+        "password_validation_hint": "Please enter the password"
+    },
+    "home": {
+        "backup_view_navigation": "Backup",
+        "task_view_navigation": "Tasks",
+        "setting_view_navigation": "Settings",
+        "exit": "Exit"
+    },
+    "file_detail": {
+        "download": "Download",
+        "unknown_file_size": "Size unknown",
+        "file_size": "Size: {size}",
+        "file_modification_time": "Last modified: {date}"
+    },
+    "file_download": {
+        "download_task_name": "Download backup files",
+        "downloading": "Downloading",
+        "download_success": "Download successful",
+        "downloaded_info": "Downloaded: {downloaded} (Skipped {skipped})",
+        "total_size": "Total size: {size}",
+        "seconds_elapsed": "Time elapsed: {second} seconds",
+        "download_cancel": "Cancel download"
+    },
+    "periodic_task": {
+        "auto_backup": "Auto backup",
+        "retention_check": "Snapshot expiration check"
+    },
+    "backup_view": {
+        "backup_task_name": "Manual backup",
+        "backup_success": "Backup completed",
+        "backup_cancel": "Backup canceled",
+        "no_snapshots": "No snapshots",
+        "start_backup": "Start backup",
+        "cancel_backup": "Cancel backup",
+        "seconds_elapsed": "Time elapsed: {second} seconds",
+        "total_files": "Total files: {number}",
+        "files_done": "Files backed up: {number}",
+        "snapshot_number": "Number of snapshots: {number}",
+        "backup_target_empty_dialog_title": "No backup target set",
+        "backup_target_empty_dialog_text": "Please add a backup target in Settings first",
+        "file_version_number": "Versions: {number}",
+        "load_snapshots_list_task_name": "Loading snapshots list",
+        "load_snapshots_file_task_name": "Loading snapshot files"
+    },
+    "setting_view": {
+        "target_paths": "Backup targets",
+        "target_paths_tip": "Selected directories will be backed up",
+        "target_path_exist": "Directory already exists: {path}",
+        "add_target_path_button": "Add directory",
+        "add_target_path_success": "Added directory: {path}",
+        "target_path_deleted": "Removed directory: {path}",
+        "auto_backup": "Auto backup",
+        "auto_backup_tip": "Automatically perform backups based on app runtime",
+        "backup_interval": "Backup interval",
+        "backup_interval_hint_text": "Interval duration for auto backup",
+        "backup_interval_suffix": "minutes",
+        "number_validation_hint": "Please enter a non-zero integer",
+        "delete_target_path_dialog_title": "Delete backup target",
+        "delete_target_path_dialog_content": "Are you sure you want to delete the directory {path}?",
+        "auto_delete": "Auto delete snapshots",
+        "auto_delete_tip": "Regularly check and delete expired snapshots based on app runtime",
+        "retention_time": "Snapshot retention",
+        "retention_time_tip": "Retention time for each snapshot; expired ones will be deleted",
+        "retention_time_suffix": "days",
+        "auto_delete_check_interval": "Check interval",
+        "auto_delete_check_interval_hint_text": "Interval for checks",
+        "auto_delete_check_interval_suffix": "minutes",
+        "system_setting": "System settings",
+        "concurrency_limit": "Concurrency limit",
+        "concurrency_limit_hint_text": "Limit for number of concurrent tasks",
+        "concurrency_limit_suffix": "tasks",
+        "auto_startup": "Start on system startup"
+    },
+    "queue_view": {
+        "view_title": "Task queue",
+        "running_tasks_title": "Running tasks",
+        "queued_tasks_title": "Queued tasks",
+        "empty_queue": "No tasks",
+        "task_is_concurrent": "Concurrent: Yes",
+        "task_is_not_concurrent": "Concurrent: No",
+        "immediately_tip": "Execute now",
+        "cancel_tip": "Cancel task"
+    }
+}

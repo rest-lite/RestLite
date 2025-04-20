@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -24,10 +25,13 @@ class PathCard extends StatelessWidget {
         ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('目录已存在: $selectedDirectory'),
+            content: Text(context.tr(
+              "setting_view.target_path_exist",
+              namedArgs: {"path": selectedDirectory},
+            )),
             backgroundColor: Theme.of(context).colorScheme.error,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onError,
             ),
@@ -42,10 +46,13 @@ class PathCard extends StatelessWidget {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('已添加目录: $selectedDirectory'),
+          content: Text(context.tr(
+            "setting_view.add_target_path_success",
+            namedArgs: {"path": selectedDirectory},
+          )),
           backgroundColor: Theme.of(context).colorScheme.primary,
           action: SnackBarAction(
-            label: '好的',
+            label: context.tr("ok"),
             onPressed: () {},
             textColor: Theme.of(context).colorScheme.onPrimary,
           ),
@@ -57,10 +64,13 @@ class PathCard extends StatelessWidget {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('已删除目录: ${paths[index]}'),
+          content: Text(context.tr(
+            "setting_view.target_path_deleted",
+            namedArgs: {"path": paths[index]},
+          )),
           backgroundColor: Theme.of(context).colorScheme.primary,
           action: SnackBarAction(
-            label: '好的',
+            label: context.tr("ok"),
             onPressed: () {},
             textColor: Theme.of(context).colorScheme.onPrimary,
           ),
@@ -76,14 +86,14 @@ class PathCard extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            const Row(
+            Row(
               children: [
                 Text(
-                  "备份目标",
+                  context.tr("setting_view.target_paths"),
                 ),
                 Tooltip(
-                  message: '将会对以下目录进行备份',
-                  child: Icon(
+                  message: context.tr("setting_view.target_paths_tip"),
+                  child: const Icon(
                     Icons.help_outline,
                     size: 20,
                   ),
@@ -115,7 +125,7 @@ class PathCard extends StatelessWidget {
             ),
             OutlinedButton(
               onPressed: _pickPath,
-              child: const Text('添加目录'),
+              child: Text(context.tr("setting_view.add_target_path_button")),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,10 +72,10 @@ class _LoginState extends State<Login> {
         _enabled = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text('正在检查储存库'),
+        content: Text(context.tr("login.check_repository")),
         backgroundColor: Theme.of(context).colorScheme.secondary,
         action: SnackBarAction(
-          label: '取消',
+          label: context.tr("cancel"),
           onPressed: () {},
           textColor: Theme.of(context).colorScheme.onSecondary,
         ),
@@ -89,10 +90,10 @@ class _LoginState extends State<Login> {
           final (err, out, process) = await createRepo(
               _savePathController.text, _passwordController.text);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('数据库不存在，正在创建'),
+            content: Text(context.tr("login.create_repository")),
             backgroundColor: Theme.of(context).colorScheme.secondary,
             action: SnackBarAction(
-              label: '取消',
+              label: context.tr("cancel"),
               onPressed: () {
                 process.kill();
               },
@@ -105,10 +106,10 @@ class _LoginState extends State<Login> {
             case 0:
               ScaffoldMessenger.of(context).removeCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: const Text('成功'),
+                content: Text(context.tr("success")),
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 action: SnackBarAction(
-                  label: '好的',
+                  label: context.tr("ok"),
                   onPressed: () {},
                   textColor: Theme.of(context).colorScheme.onPrimary,
                 ),
@@ -121,10 +122,10 @@ class _LoginState extends State<Login> {
           break;
         case RepositoryStatus.ok:
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('成功'),
+            content: Text(context.tr("success")),
             backgroundColor: Theme.of(context).colorScheme.primary,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onPrimary,
             ),
@@ -133,20 +134,20 @@ class _LoginState extends State<Login> {
           loginOk();
         case RepositoryStatus.wrongPassword:
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('密码错误，请重新输入密码'),
+            content: Text(context.tr("login.password_wrong")),
             backgroundColor: Theme.of(context).colorScheme.error,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onError,
             ),
           ));
         case RepositoryStatus.invalidPath:
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('备份储存位置不存在，请更换或创建'),
+            content: Text(context.tr("login.repository_path_not_exist")),
             backgroundColor: Theme.of(context).colorScheme.error,
             action: SnackBarAction(
-              label: '好的',
+              label: context.tr("ok"),
               onPressed: () {},
               textColor: Theme.of(context).colorScheme.onError,
             ),
@@ -192,15 +193,18 @@ class _LoginState extends State<Login> {
                           key: _directorySelectorKey,
                           enabled: _enabled,
                           controller: _savePathController,
-                          decoration: const InputDecoration(
-                            labelText: '备份储存位置',
-                            hintText: '请使用按钮选择',
-                            border: OutlineInputBorder(),
-                            suffixIcon: Icon(Icons.folder_open),
+                          decoration: InputDecoration(
+                            labelText:
+                                context.tr("login.repository_path_label_text"),
+                            hintText:
+                                context.tr("login.repository_path_hint_text"),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: const Icon(Icons.folder_open),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return '请选择备份储存位置';
+                              return context
+                                  .tr("login.repository_validator_tip");
                             }
                             return null;
                           },
@@ -209,7 +213,8 @@ class _LoginState extends State<Login> {
                       const SizedBox(width: 10),
                       OutlinedButton(
                         onPressed: _enabled ? _pickPath : null,
-                        child: const Text('选择'),
+                        child: Text(
+                            context.tr("login.repository_path_select_button")),
                       ),
                     ]),
                     const SizedBox(height: 16),
@@ -218,15 +223,15 @@ class _LoginState extends State<Login> {
                     TextFormField(
                       enabled: _enabled,
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: '备份快照加密密码',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: context.tr("login.password_label_text"),
+                        border: const OutlineInputBorder(),
                       ),
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       obscureText: true,
-                      validator: _validatePassword,
+                      validator: (value) => _validatePassword(context, value),
                       onChanged: (value) async {
-                        if (_validatePassword(value) != null) return;
+                        if (_validatePassword(context, value) != null) return;
 
                         if (_keepPassword) {
                           await _prefer.setString(
@@ -238,14 +243,14 @@ class _LoginState extends State<Login> {
 
                     // 开关
                     SwitchListTile(
-                      title: const Row(
+                      title: Row(
                         children: [
                           Text(
-                            "记住密码",
+                            context.tr("login.keep_password"),
                           ),
                           Tooltip(
-                            message: '记住密码并自动载入备份仓库',
-                            child: Icon(
+                            message: context.tr("login.keep_password_tip"),
+                            child: const Icon(
                               Icons.help_outline,
                               size: 20,
                             ),
@@ -272,7 +277,7 @@ class _LoginState extends State<Login> {
                     // 提交按钮
                     ElevatedButton(
                       onPressed: _enabled ? _submitForm : null,
-                      child: const Text('确认'),
+                      child: Text(context.tr("confirm")),
                     ),
                   ],
                 ),
@@ -285,9 +290,9 @@ class _LoginState extends State<Login> {
   }
 }
 
-String? _validatePassword(String? value) {
+String? _validatePassword(BuildContext context, String? value) {
   if (value == null || value.isEmpty) {
-    return '请输入密码';
+    return context.tr("login.password_validation_hint");
   }
   return null;
 }

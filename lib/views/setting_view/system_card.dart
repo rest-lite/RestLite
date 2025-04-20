@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -52,11 +53,11 @@ class _SystemCardState extends State<SystemCard> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "系统设置",
+                  context.tr("setting_view.system_setting"),
                 ),
               ],
             ),
@@ -65,23 +66,25 @@ class _SystemCardState extends State<SystemCard> {
               controller: controller,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(
-                labelText: '并发限制',
-                hintText: '允许并发执行的任务数量限制',
-                suffix: Text('个'),
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.schedule),
+              decoration: InputDecoration(
+                labelText: context.tr("setting_view.concurrency_limit"),
+                hintText:
+                    context.tr("setting_view.concurrency_limit_hint_text"),
+                suffix:
+                    Text(context.tr("setting_view.concurrency_limit_suffix")),
+                border: const OutlineInputBorder(),
+                suffixIcon: const Icon(Icons.schedule),
               ),
-              validator: validateNonZeroInput,
+              validator: (v) => validateNonZeroInput(context, v),
               onChanged: (value) async {
-                if (validateNonZeroInput(value) != null) {
+                if (validateNonZeroInput(context, value) != null) {
                   return;
                 }
                 widget.onUpdate(int.parse(controller.text), autoStartup);
               },
             ),
             CheckboxListTile(
-              title: const Text("开机启动"),
+              title: Text(context.tr("setting_view.auto_startup")),
               onChanged: (value) async {
                 autoStartup = value ?? false;
                 setState(() {});
@@ -96,8 +99,8 @@ class _SystemCardState extends State<SystemCard> {
   }
 }
 
-String? validateNonZeroInput(String? value) {
-  const errTip = '请输入不为零的数';
+String? validateNonZeroInput(BuildContext context, String? value) {
+  final errTip = context.tr("setting_view.number_validation_hint");
   if (value == null || value.isEmpty) {
     return errTip;
   }

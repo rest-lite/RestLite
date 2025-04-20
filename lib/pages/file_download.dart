@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -40,7 +41,7 @@ class _FileDownloadState extends State<FileDownload> {
 
   void download(String snapshotID, String filePath, String downloadPath) async {
     final _task = resticService.addTask(RestoreTask(
-      "下载备份文件",
+      context.tr("file_download.download_task_name"),
       widget.loginContext.savePath,
       widget.loginContext.password,
       snapshotID,
@@ -75,7 +76,9 @@ class _FileDownloadState extends State<FileDownload> {
   void initState() {
     super.initState();
     downloading = true;
-    download(widget.snapshotID, widget.filePath, widget.downloadPath);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      download(widget.snapshotID, widget.filePath, widget.downloadPath);
+    });
   }
 
   @override
@@ -104,7 +107,9 @@ class _FileDownloadState extends State<FileDownload> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              downloading ? "正在下载" : "下载完成",
+              downloading
+                  ? context.tr("file_download.downloading")
+                  : context.tr("file_download.download_success"),
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -129,7 +134,7 @@ class _FileDownloadState extends State<FileDownload> {
                     value: (data.bytesRestored ?? 0) / (data.totalBytes ?? 1),
                     minHeight: 20,
                     valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                        const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
                     backgroundColor: Colors.transparent,
                   ),
                 ),
@@ -148,14 +153,22 @@ class _FileDownloadState extends State<FileDownload> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                    "已下载：${formatBytes(data.bytesRestored ?? 0)}(跳过${formatBytes(data.bytesSkipped ?? 0)})",
+                    context.tr("file_download.downloaded_info", namedArgs: {
+                      "downloaded": formatBytes(data.bytesRestored ?? 0),
+                      "skipped": formatBytes(data.bytesSkipped ?? -1)
+                    }),
                     style: const TextStyle(fontSize: 16)),
-                Text("总大小：${formatBytes(data.totalBytes ?? 0)}",
+                Text(
+                    context.tr("file_download.total_size",
+                        namedArgs: {"size": formatBytes(data.totalBytes ?? 0)}),
                     style: const TextStyle(fontSize: 16)),
               ],
             ),
             const SizedBox(height: 12),
-            Text("已花费时间：${data.secondsElapsed ?? 0}秒",
+            Text(
+                context.tr("file_download.seconds_elapsed", namedArgs: {
+                  "second": (data.secondsElapsed ?? 0).toString()
+                }),
                 style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 24),
             if (downloading)
@@ -165,7 +178,7 @@ class _FileDownloadState extends State<FileDownload> {
                   task?.cancel();
                 },
                 icon: const Icon(Icons.cancel),
-                label: const Text("取消下载"),
+                label: Text(context.tr("file_download.download_cancel")),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
@@ -180,7 +193,7 @@ class _FileDownloadState extends State<FileDownload> {
               ElevatedButton.icon(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.done),
-                label: const Text("确认"),
+                label: Text(context.tr("confirm")),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
