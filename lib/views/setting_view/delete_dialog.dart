@@ -11,7 +11,7 @@ class DeleteDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(context.tr("setting_view.delete_target_path_dialog_title")),
       content: Text(context.tr(
-        "setting_view.delete_target_path_dialog_context",
+        "setting_view.delete_target_path_dialog_content",
         namedArgs: {"path": path},
       )),
       actions: <Widget>[
