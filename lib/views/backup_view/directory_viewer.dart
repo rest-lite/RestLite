@@ -3,39 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'util.dart';
 
-class SnapshotInfo {
-  String id;
-  int? size;
-  DateTime time;
-  DateTime fileModificationTime;
-  SnapshotInfo(
-    this.id,
-    this.size,
-    this.time,
-    this.fileModificationTime,
-  );
-  @override
-  String toString() {
-    return 'SnapshotInfo { '
-        'id: $id, '
-        'size: ${size ?? "null"}, '
-        'time: ${time.toIso8601String()}, '
-        'fileModificationTime: ${fileModificationTime.toIso8601String()} '
-        '}';
-  }
-}
-
-class FileInfo {
-  final String name;
-  final String path;
-  final bool isDirectory;
-  final Set<SnapshotInfo> snapshots;
-
-  FileInfo(this.name, this.path, this.isDirectory, this.snapshots);
-}
-
-enum SampleItem { itemOne, itemTwo, itemThree }
-
 class DirectoryViewer extends StatelessWidget {
   final DirectoryNode root;
 

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rest_lite/pages/file_download.dart';
 
-import '../views/backup_view/directory_viewer.dart';
 import '../views/backup_view/util.dart';
 import 'file_detail.dart';
 import 'home.dart';

@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rest_lite/restic/task_manager.dart';
+import 'package:rest_lite/views/backup_view/title_card.dart';
 import 'package:rest_lite/views/setting_view/setting_view.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -84,7 +85,7 @@ class _BackupViewState extends State<BackupView> {
   List<Snapshot>? snapshots;
 
   void _loadFiles() async {
-    snapshots = await loadSnapshots(
+    snapshots = await snapshotList(
       widget.loginContext.savePath,
       widget.loginContext.password,
       context,
@@ -99,7 +100,7 @@ class _BackupViewState extends State<BackupView> {
     }
 
     for (var snapshot in snapshots!) {
-      loadFiles(
+      fileList(
         widget.loginContext.savePath,
         snapshot.id,
         widget.loginContext.password,
@@ -121,7 +122,7 @@ class _BackupViewState extends State<BackupView> {
   TaskControl<BackupOutput>? backupTask;
   Future<void> _backup() async {
     if (widget.settingContext.backupPaths.isEmpty) {
-      _showMyDialog();
+      _showTargetEmptyDialog();
       return;
     }
     setState(() {
@@ -181,23 +182,30 @@ class _BackupViewState extends State<BackupView> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: _nodesStream,
-      builder: (context, snapshot) {
-        Widget directoryViewer = const Center(
-          child: CircularProgressIndicator(),
-        );
-        if (snapshot.data != null) {
-          if ((snapshot.data!.children?.isEmpty ?? true)) {
-            directoryViewer = Center(
-              child: Text(context.tr("backup_view.no_snapshots")),
-            );
-          } else {
-            directoryViewer = DirectoryViewer(
-              root: snapshot.data!,
+    return Column(
+      children: [
+        TitleCard(
+          isBackingUp: _isBackingUp,
+          backingUpStream: _backingUpStream,
+          snapshotNumber: snapshots?.length ?? 0,
+          backup: _backup,
+          cancel: _cancel,
+        ),
+        Expanded(
+            child: StreamBuilder(
+          stream: _nodesStream,
+          builder: (context, snapshot) {
+            var _data = snapshot.data;
+            if (_data == null) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            return DirectoryViewer(
+              root: _data,
               loadDirectory: (dir) async {
                 for (var value in snapshots!) {
-                  loadFiles(
+                  fileList(
                     widget.loginContext.savePath,
                     value.id,
                     widget.loginContext.password,
@@ -210,87 +218,13 @@ class _BackupViewState extends State<BackupView> {
               },
               showDetail: (path) => widget.pageBuild.buildFileDetailPage(path),
             );
-          }
-        }
-        return Column(
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Column(
-                      children: [
-                        OutlinedButton(
-                            onPressed: _isBackingUp ? null : _backup,
-                            child:
-                                Text(context.tr("backup_view.start_backup"))),
-                        if (_isBackingUp)
-                          const SizedBox(
-                            height: 8,
-                          ),
-                        if (_isBackingUp)
-                          OutlinedButton(
-                              onPressed: _cancel,
-                              child: Text(
-                                  context.tr("backup_view.cancel_backup"))),
-                      ],
-                    ),
-                    if (_isBackingUp)
-                      const SizedBox(
-                        width: 8,
-                      ),
-                    Offstage(
-                      offstage: !_isBackingUp,
-                      child: StreamBuilder(
-                          stream: _backingUpStream,
-                          builder: (context, snapshot) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(context.tr("backup_view.seconds_elapsed",
-                                    namedArgs: {
-                                      "second": snapshot.data?.secondsElapsed
-                                              .toString() ??
-                                          ""
-                                    })),
-                                Text(context
-                                    .tr("backup_view.total_files", namedArgs: {
-                                  "number":
-                                      snapshot.data?.totalFiles.toString() ?? ""
-                                })),
-                                Text(context
-                                    .tr("backup_view.files_done", namedArgs: {
-                                  "number":
-                                      snapshot.data?.filesDone.toString() ?? ""
-                                })),
-                              ],
-                            );
-                          }),
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Column(
-                      children: [
-                        Text(context.tr("backup_view.snapshot_number",
-                            namedArgs: {
-                              "number": snapshots?.length.toString() ?? ""
-                            })),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(child: directoryViewer)
-          ],
-        );
-      },
+          },
+        )),
+      ],
     );
   }
 
-  Future<void> _showMyDialog() async {
+  Future<void> _showTargetEmptyDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,

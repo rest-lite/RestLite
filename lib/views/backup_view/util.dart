@@ -10,9 +10,30 @@ import '../../restic/json_type.dart';
 import '../../restic/tasks.dart';
 import '../../services/restic.dart';
 import '../../services/store.dart';
-import 'directory_viewer.dart';
 // ignore: unnecessary_import
 import 'package:objectbox/objectbox.dart';
+
+class SnapshotInfo {
+  String id;
+  int? size;
+  DateTime time;
+  DateTime fileModificationTime;
+  SnapshotInfo(
+    this.id,
+    this.size,
+    this.time,
+    this.fileModificationTime,
+  );
+}
+
+class FileInfo {
+  final String name;
+  final String path;
+  final bool isDirectory;
+  final Set<SnapshotInfo> snapshots;
+
+  FileInfo(this.name, this.path, this.isDirectory, this.snapshots);
+}
 
 class LoginContext {
   String savePath;
@@ -35,33 +56,6 @@ class DirectoryNode {
     required this.snapshots,
     this.children,
   });
-
-  @override
-  String toString() {
-    return _toStringWithIndent();
-  }
-
-  String _toStringWithIndent([String indent = '']) {
-    final buffer = StringBuffer()
-      ..writeln('$indent DirectoryNode(')
-      ..writeln('$indent  name: "$name",')
-      ..writeln('$indent  path: "$path",')
-      ..writeln('$indent  isDirectory: $isDirectory,')
-      ..writeln('$indent  snapshots: $snapshots,');
-
-    if (children != null) {
-      buffer.writeln('$indent  children: [');
-      for (var child in children!) {
-        buffer.write(child._toStringWithIndent('$indent    '));
-      }
-      buffer.writeln('$indent  ]');
-    } else {
-      buffer.writeln('$indent  children: null');
-    }
-
-    buffer.writeln('$indent),');
-    return buffer.toString();
-  }
 }
 
 // 更新使用: flutter pub run build_runner build
@@ -218,7 +212,7 @@ DirectoryNode buildDirectoryTree(Set<Node> originNodes) {
   return tree;
 }
 
-Future<List<Snapshot>> loadSnapshots(
+Future<List<Snapshot>> snapshotList(
   String repositoryPath,
   String password,
   BuildContext context,
@@ -234,7 +228,7 @@ Future<List<Snapshot>> loadSnapshots(
   return [];
 }
 
-Future<void> loadFiles(
+Future<void> fileList(
   String repositoryPath,
   String snapshotID,
   String password,
