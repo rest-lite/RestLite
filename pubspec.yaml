@@ -37,7 +37,7 @@ dependencies:
   path: ^1.9.0
   json_annotation: ^4.9.0
   rxdart: ^0.28.0
-  objectbox: ^1.7.0
+  objectbox: ^4.1.0
   objectbox_flutter_libs: any
   file_picker: ^8.1.2
   logging: ^1.2.0

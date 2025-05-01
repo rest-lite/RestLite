@@ -7,10 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:rest_lite/restic/task_manager.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../objectbox.g.dart';
 import '../restic/json_type.dart';
 import '../restic/tasks.dart';
-import '../views/backup_view/util.dart';
 import 'restic.dart';
 import 'store.dart';
 
@@ -175,14 +173,8 @@ class BackupRetentionCheckService {
       }
       // 移除快照缓存
       if (removes.isNotEmpty) {
-        instance.log.info("remove len:", removes.length.toString());
-        final box = store.box<SnapshotStore>();
         for (final v in removes) {
-          final query =
-              box.query(SnapshotStore_.snapshotID.equals(v.id)).build();
-          box.removeMany(query.findIds());
-          query.close();
-          instance.log.info("remove cache: ${v.id}");
+          store.deleteFileListCachedData(v.id);
         }
       }
     });

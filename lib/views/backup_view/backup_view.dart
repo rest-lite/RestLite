@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rest_lite/restic/task_manager.dart';
+import 'package:rest_lite/util/string.dart';
 import 'package:rest_lite/views/backup_view/title_card.dart';
 import 'package:rest_lite/views/setting_view/setting_view.dart';
 import 'package:rxdart/rxdart.dart';
@@ -14,7 +15,7 @@ import '../../restic/json_type.dart';
 import '../../restic/tasks.dart';
 import '../../services/periodic.dart';
 import '../../services/restic.dart';
-import '../../util/string.dart';
+import '../../services/store.dart';
 import 'directory_viewer.dart';
 import 'util.dart';
 
@@ -45,13 +46,13 @@ class _BackupViewState extends State<BackupView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadFiles();
+      reloadSnapshot();
       _backupServiceSubscription = BackupService.onCycleFinished.listen((_) {
-        _loadFiles();
+        reloadSnapshot();
       });
       _retentionCheckSubscription =
           BackupRetentionCheckService.onCycleFinished.listen((_) {
-        _loadFiles();
+        reloadSnapshot();
       });
     });
   }
@@ -60,7 +61,7 @@ class _BackupViewState extends State<BackupView> {
   void didUpdateWidget(covariant BackupView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.loginContext != widget.loginContext) {
-      _loadFiles();
+      reloadSnapshot();
     }
   }
 
@@ -84,7 +85,7 @@ class _BackupViewState extends State<BackupView> {
   });
   List<Snapshot>? snapshots;
 
-  void _loadFiles() async {
+  Future<void> reloadSnapshot() async {
     snapshots = await snapshotList(
       widget.loginContext.savePath,
       widget.loginContext.password,
@@ -99,18 +100,38 @@ class _BackupViewState extends State<BackupView> {
       _nodesStreamController.add(nodes);
     }
 
-    for (var snapshot in snapshots!) {
-      fileList(
-        widget.loginContext.savePath,
-        snapshot.id,
-        widget.loginContext.password,
+    load(
+        snapshots!,
         widget.settingContext.backupPaths
             .map((v) => toLinuxStylePath(v))
-            .toSet(),
-        nodes,
-        _nodesStreamController,
-        context,
-      );
+            .toSet());
+  }
+
+  void load(List<Snapshot> snapshots, Set<String> paths) async {
+    for (var snapshot in snapshots) {
+      for (final path in paths) {
+        final v = await store.getFileListCachedData(snapshot.id, path);
+        if (v == null) {
+          (() async {
+            final Set<Node> _nodes = {};
+            await for (var v in fileList(
+              widget.loginContext.savePath,
+              snapshot.id,
+              widget.loginContext.password,
+              {path},
+              context,
+            )) {
+              nodes.add(v);
+              _nodes.add(v);
+            }
+            _nodesStreamController.add(nodes);
+            await store.setFileListCachedData(snapshot.id, path, _nodes);
+          })();
+          continue;
+        }
+        nodes.addAll(v);
+        _nodesStreamController.add(nodes);
+      }
     }
   }
 
@@ -167,7 +188,7 @@ class _BackupViewState extends State<BackupView> {
       }
     }
 
-    _loadFiles();
+    reloadSnapshot();
     setState(() {
       _isBackingUp = false;
     });
@@ -204,17 +225,7 @@ class _BackupViewState extends State<BackupView> {
             return DirectoryViewer(
               root: _data,
               loadDirectory: (dir) async {
-                for (var value in snapshots!) {
-                  fileList(
-                    widget.loginContext.savePath,
-                    value.id,
-                    widget.loginContext.password,
-                    {dir},
-                    nodes,
-                    _nodesStreamController,
-                    context,
-                  );
-                }
+                load(snapshots!, {dir});
               },
               showDetail: (path) => widget.pageBuild.buildFileDetailPage(path),
             );

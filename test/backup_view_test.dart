@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rest_lite/services/store.dart';
 import 'package:rest_lite/views/backup_view/util.dart';
 
 void main() {

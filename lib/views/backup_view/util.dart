@@ -5,13 +5,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rest_lite/restic/task_manager.dart';
 
-import '../../objectbox.g.dart';
 import '../../restic/json_type.dart';
 import '../../restic/tasks.dart';
 import '../../services/restic.dart';
 import '../../services/store.dart';
-// ignore: unnecessary_import
-import 'package:objectbox/objectbox.dart';
 
 class SnapshotInfo {
   String id;
@@ -55,58 +52,6 @@ class DirectoryNode {
     required this.isDirectory,
     required this.snapshots,
     this.children,
-  });
-}
-
-// 更新使用: flutter pub run build_runner build
-@Entity()
-class Node {
-  @Id()
-  int id;
-  final String name;
-  final String type;
-  final String path;
-  final int? size;
-
-  @Property(type: PropertyType.date)
-  final DateTime snapshotsTime;
-  @Property(type: PropertyType.date)
-  final DateTime modificationTime;
-  final String snapshotID;
-  Node({
-    this.id = 0,
-    required this.size,
-    required this.name,
-    required this.type,
-    required this.path,
-    required this.snapshotID,
-    required this.snapshotsTime,
-    required this.modificationTime,
-  });
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Node &&
-        other.path == path &&
-        other.modificationTime == modificationTime &&
-        other.size == size;
-  }
-
-  @override
-  int get hashCode => path.hashCode ^ modificationTime.hashCode ^ size.hashCode;
-}
-
-@Entity()
-class SnapshotStore {
-  @Id()
-  int id;
-  final nodes = ToMany<Node>();
-  final String snapshotID;
-  final String path;
-  SnapshotStore({
-    this.id = 0,
-    required this.snapshotID,
-    required this.path,
   });
 }
 
@@ -228,68 +173,45 @@ Future<List<Snapshot>> snapshotList(
   return [];
 }
 
-Future<void> fileList(
+Stream<Node> fileList(
   String repositoryPath,
   String snapshotID,
   String password,
   Set<String> paths,
-  Set<Node> nodes,
-  StreamController<Set<Node>> outStreamController,
   BuildContext context,
-) async {
-  final snapshotBox = store.box<SnapshotStore>();
-  for (var path in paths) {
-    final query = (snapshotBox.query(
-            SnapshotStore_.snapshotID.equals(snapshotID) &
-                SnapshotStore_.path.equals(path)))
-        .build();
-    final results = query.find();
-    query.close();
-    if (results.isNotEmpty) {
-      for (var v in results.first.nodes) {
-        nodes.add(v);
-      }
-      outStreamController.add(nodes);
-      continue;
-    }
+) async* {
+  final loadFileTask = resticService.addTask(LoadFileTask(
+    context.tr("backup_view.load_snapshots_file_task_name"),
+    paths,
+    repositoryPath,
+    password,
+    snapshotID,
+  ));
 
-    final snapshotStore = SnapshotStore(snapshotID: snapshotID, path: path);
-    final loadFileTask = resticService.addTask(LoadFileTask(
-      context.tr("backup_view.load_snapshots_file_task_name"),
-      {path},
-      repositoryPath,
-      password,
-      snapshotID,
-    ));
-
-    DateTime? snapshotTime;
-    await for (final data in loadFileTask.stream) {
-      switch (data) {
-        case Msg<LsOutput> value:
-          if (value.data.messageType == "node") {
-            final node = Node(
-              name: value.data.name!,
-              size: value.data.size,
-              type: value.data.type!,
-              path: value.data.path!,
-              snapshotID: snapshotID,
-              snapshotsTime: snapshotTime!,
-              modificationTime: DateTime.parse(value.data.mtime!),
-            );
-            nodes.add(node);
-            snapshotStore.nodes.add(node);
-          } else if (value.data.messageType == "snapshot") {
-            snapshotTime = DateTime.parse(value.data.time!);
-          }
-        case MakeWay<LsOutput>():
-          nodes.clear();
-          snapshotStore.nodes.clear();
-          snapshotTime = null;
-        case Done<LsOutput>():
-          snapshotBox.put(snapshotStore);
-        case Cancel<LsOutput>():
-      }
-      outStreamController.add(nodes);
+  DateTime? snapshotTime;
+  await for (final data in loadFileTask.stream) {
+    switch (data) {
+      case Msg<LsOutput> value:
+        if (value.data.messageType == "node") {
+          final node = Node(
+            name: value.data.name!,
+            size: value.data.size,
+            type: value.data.type!,
+            path: value.data.path!,
+            snapshotID: snapshotID,
+            snapshotsTime: snapshotTime!,
+            modificationTime: DateTime.parse(value.data.mtime!),
+          );
+          yield node;
+        } else if (value.data.messageType == "snapshot") {
+          snapshotTime = DateTime.parse(value.data.time!);
+        }
+      case MakeWay<LsOutput>():
+        snapshotTime = null;
+      case Done<LsOutput>():
+        return;
+      case Cancel<LsOutput>():
+        return;
     }
   }
 }

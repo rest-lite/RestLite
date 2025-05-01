@@ -11,8 +11,8 @@ import 'pages/login.dart';
 import 'services/periodic.dart';
 import 'services/restic.dart' as restic_service;
 import 'services/restic.dart';
-import 'services/store.dart' as store;
 import 'services/logger.dart' as log;
+import 'services/store.dart';
 import 'views/backup_view/util.dart';
 
 Future<void> main() async {
