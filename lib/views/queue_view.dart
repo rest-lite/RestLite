@@ -49,9 +49,9 @@ class _QueueViewState extends State<QueueView> {
         child: ListView(
           children: [
             _buildTaskSection(context.tr("queue_view.running_tasks_title"),
-                runningTasks, Icons.play_arrow, Colors.green),
+                runningTasks, Icons.play_arrow, Colors.green, true),
             _buildTaskSection(context.tr("queue_view.queued_tasks_title"),
-                queuedTasks, Icons.queue, Colors.orange),
+                queuedTasks, Icons.queue, Colors.orange, false),
           ],
         ),
       ),
@@ -60,7 +60,7 @@ class _QueueViewState extends State<QueueView> {
 
   /// 构建任务列表块
   Widget _buildTaskSection(String title, List<TaskControl<dynamic>> tasks,
-      IconData icon, Color iconColor) {
+      IconData icon, Color iconColor, bool running) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -82,29 +82,45 @@ class _QueueViewState extends State<QueueView> {
               return ListTile(
                 leading: Icon(icon, color: iconColor),
                 title: Text(taskControl.name),
-                subtitle: Text(isConcurrent
-                    ? context.tr("queue_view.task_is_concurrent")
-                    : context.tr("queue_view.task_is_not_concurrent")),
-                trailing: Wrap(
-                  spacing: 8,
+                subtitle: Text(taskControl.description ?? ""),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.play_circle_fill,
-                          color: Colors.blue),
-                      tooltip: context.tr("queue_view.immediately_tip"),
-                      onPressed: () {
-                        taskControl.immediately();
-                        setState(() {});
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.cancel, color: Colors.red),
-                      tooltip: context.tr("queue_view.cancel_tip"),
-                      onPressed: () {
-                        taskControl.cancel();
-                        setState(() {});
-                      },
-                    ),
+                    isConcurrent
+                        ? Tooltip(
+                            message:
+                                context.tr("queue_view.task_is_concurrent"),
+                            child: const Icon(
+                              Icons.splitscreen,
+                              color: Colors.green,
+                            ),
+                          )
+                        : Tooltip(
+                            message:
+                                context.tr("queue_view.task_is_not_concurrent"),
+                            child: const Icon(
+                              Icons.splitscreen,
+                              color: Colors.orange,
+                            ),
+                          ),
+                    running
+                        ? IconButton(
+                            icon: const Icon(Icons.cancel, color: Colors.red),
+                            tooltip: context.tr("queue_view.cancel_tip"),
+                            onPressed: () {
+                              taskControl.cancel();
+                              setState(() {});
+                            },
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.play_circle_fill,
+                                color: Colors.blue),
+                            tooltip: context.tr("queue_view.immediately_tip"),
+                            onPressed: () {
+                              taskControl.immediately();
+                              setState(() {});
+                            },
+                          ),
                   ],
                 ),
               );

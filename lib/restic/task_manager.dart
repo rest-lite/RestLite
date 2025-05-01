@@ -7,6 +7,7 @@ abstract class ResticTask<T> {
 
   bool get concurrent;
   String get name;
+  String? get description;
 }
 
 class TaskControl<T> {
@@ -14,10 +15,17 @@ class TaskControl<T> {
   void Function() cancel;
   final bool concurrent;
   final String name;
+  final String? description;
   Stream<TaskRunning<T>> stream;
 
   TaskControl(
-      this.stream, this.immediately, this.cancel, this.concurrent, this.name);
+    this.stream,
+    this.immediately,
+    this.cancel,
+    this.concurrent,
+    this.name,
+    this.description,
+  );
 }
 
 /// 任务状态
@@ -53,6 +61,7 @@ class _TaskWrapper<T> {
     () => _manager._cancelTask(this),
     task.concurrent,
     task.name,
+    task.description,
   );
 
   final StreamController<TaskRunning<T>> _msg = StreamController.broadcast();

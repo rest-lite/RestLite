@@ -188,24 +188,3 @@ class BackupRetentionCheckService {
     instance.periodic.stop();
   }
 }
-
-class ListItem {
-  String itemName;
-  int quantity;
-
-  // 私有构造函数
-  ListItem._(this.itemName, this.quantity);
-
-  // 静态实例
-  static ListItem? _instance;
-
-  // 获取实例的方法
-  static ListItem getInstance(String itemName, int quantity) {
-    _instance ??= ListItem._(itemName, quantity);
-    return _instance!;
-  }
-
-  void display() {
-    print("Item: $itemName, Quantity: $quantity");
-  }
-}

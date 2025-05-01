@@ -22,13 +22,22 @@ class BackupTask extends ResticTask<BackupOutput> {
   List<String> backupPaths;
   String password;
   final String _name;
-  BackupTask(this._name, this.backupPaths, this.repositoryPath, this.password);
+  BackupTask(
+    this._name,
+    this.backupPaths,
+    this.repositoryPath,
+    this.password,
+  );
 
   @override
   String get name => _name;
 
   @override
   bool get concurrent => false;
+
+  @override
+  String? get description =>
+      "restic -r $repositoryPath backup ${backupPaths.join(" ")}";
 
   @override
   Stream<BackupOutput> start() async* {
@@ -110,6 +119,9 @@ class LoadFileTask extends ResticTask<LsOutput> {
   bool get concurrent => true;
   @override
   String get name => _name;
+  @override
+  String? get description =>
+      "restic -r $repositoryPath ls $snapshotID --long --no-lock ${paths.join(" ")}";
 
   @override
   Stream<LsOutput> start() async* {
@@ -188,6 +200,8 @@ class LoadSnapshotsTask extends ResticTask<List<Snapshot>> {
   bool get concurrent => true;
   @override
   String get name => _name;
+  @override
+  String? get description => "restic -r $repositoryPath snapshots";
 
   @override
   Stream<List<Snapshot>> start() async* {
@@ -253,6 +267,9 @@ class DeleteSnapshotsTask extends ResticTask<ForgetGroup> {
   bool get concurrent => false;
   @override
   String get name => _name;
+  @override
+  String? get description =>
+      "restic -r $repositoryPath forget --keep-within ${keepDay.toString()}d";
 
   @override
   Stream<ForgetGroup> start() async* {
@@ -342,6 +359,9 @@ class RestoreTask extends ResticTask<RestoreOutput> {
   bool get concurrent => true;
   @override
   String get name => _name;
+  @override
+  String? get description =>
+      "restic -r $repositoryPath restore $snapshot:${path.dirname(restoreTargetPath)} --target $savePath --include ${path.basename(restoreTargetPath)}";
 
   // restic -r <repo> restore <snapshot>:<prefix_path> --target <save_path> --include <restore_target> --json
   @override

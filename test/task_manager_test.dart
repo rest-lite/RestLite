@@ -24,6 +24,8 @@ class ExampleTask extends ResticTask<ExampleEvent> {
   Future<Process>? process;
   @override
   bool get concurrent => false;
+  @override
+  String? get description => null;
 
   @override
   Stream<ExampleEvent> start() async* {
@@ -78,6 +80,8 @@ class ExampleConcurrentTask extends ResticTask<ExampleEvent> {
   Future<Process>? process;
   @override
   bool get concurrent => true;
+  @override
+  String? get description => null;
 
   @override
   Stream<ExampleEvent> start() async* {
